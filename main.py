@@ -90,7 +90,6 @@ async def startserver(interaction: discord.Interaction):
 
                 await asyncio.to_thread(ssh_client, "cd minecraft-forge; ./RUN-FOR-SERVER")
 
-                
             except Exception as e:
                 print(e)
 
@@ -101,7 +100,24 @@ async def startserver(interaction: discord.Interaction):
         await interaction.followup.send(e)
 
 
-@bot.tree.command(name="reboot", description="Reboot RaspberryPI (used for closing the server till I make a better fix.)")
+@bot.tree.command(name="stopserver", description="Stops the server.")
+async def stopserver(interaction: discord.Integration):
+    embed = discord.Embed(title="Stopping server...", color=0x9e0000)
+
+    try:    
+        if not check_minecraft_server_status():
+            await interaction.response.send_message("Server is not running.")
+        else:
+            await interaction.response.defer()
+            await asyncio.to_thread(ssh_client, "pkill -f 'playit-linux-aarch64'")
+            await asyncio.to_thread(ssh_client, "sudo pkill -f 'java'")
+            await interaction.followup.send(embed=embed)
+
+    except Exception as e:
+        print(e)
+
+
+@bot.tree.command(name="reboot", description="Reboot RaspberryPI (if server is flaky reboot and start server.)")
 async def reboot(interaction: discord.Interaction):
     embed = discord.Embed(title="Rebooting...", description="It may take up to 60 seconds.", color=0xff3b3b)
     
